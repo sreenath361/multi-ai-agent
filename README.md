@@ -1,5 +1,8 @@
 # Multi AI Agent Project Documentation
 
+<img width="1390" height="724" alt="Screenshot 2026-02-13 at 10 20 45 PM" src="https://github.com/user-attachments/assets/febb2bb4-dee7-414c-96be-33a8bb05be4d" />
+
+
 
 ### 🔧 Step 1: Launch EC2 instance on AWS
 
