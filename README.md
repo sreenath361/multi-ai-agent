@@ -103,7 +103,15 @@ Follow the steps below to set up Jenkins inside a Docker container and configure
 Build the Docker image for Jenkins:
 
 ```bash
+getent group docker
 docker build -t jenkins-dind .
+```
+If your host says: docker:x:988:ubuntu
+
+then run below command:
+
+```bash
+docker build --build-arg DOCKER_GID=988 -t jenkins-dind .
 ```
 
 ### 4. Run Jenkins Container
@@ -111,9 +119,9 @@ docker build -t jenkins-dind .
 Run the Jenkins container with the following command:
 
 ```bash
-docker run -d --name jenkins-dind \
-  --privileged \
-  -p 8080:8080 -p 50000:50000 \
+docker run -d \
+  -p 8080:8080 \
+  -p 50000:50000 \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v jenkins_home:/var/jenkins_home \
   jenkins-dind
