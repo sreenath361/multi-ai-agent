@@ -1,24 +1,11 @@
-# MULTI AI AGENT PROJECT DOCUMENTATION
+# Multi AI Agent Project Documentation
 
-## WSL Installation
-
-## 🐧 Installing Ubuntu via WSL and Docker Engine Inside Ubuntu (on Windows)
 
 ### 🔧 Step 1: Launch EC2 instance on AWS
 
 ---
 
-### 🛍️ Step 2: Install Ubuntu
-
-1. Open **Microsoft Store**
-2. Search for **Ubuntu**
-3. Choose a version (e.g., **Ubuntu 22.04 LTS**)
-4. Click **Get** or **Install**
-5. Launch Ubuntu from Start Menu and set up username/password
-
----
-
-### 🐳 Step 3: Install Docker Engine in Ubuntu (EC2)
+### 🐳 Step 2: Install Docker Engine in Ubuntu (EC2)
 
 Run the following commands in the Ubuntu terminal:
 
