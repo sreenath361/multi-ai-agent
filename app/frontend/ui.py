@@ -41,8 +41,9 @@ if st.button("Ask Agent") and user_query.strip():
             st.markdown(agent_response.replace("\n","<br>"), unsafe_allow_html=True)
 
         else:
-            logger.error("Backend error")
-            st.error("Error with backend")
+            error_detail = response.text
+            logger.error(f"Backend error: {response.status_code} - {error_detail}")
+            st.error(f"Backend error ({response.status_code}): {error_detail}")
     
     except Exception as e:
         logger.error("Error occured while sending request to backend")

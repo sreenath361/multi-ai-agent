@@ -3,28 +3,57 @@ from langchain_community.tools.tavily_search import TavilySearchResults
 
 from langgraph.prebuilt import create_react_agent
 from langchain_core.messages.ai import AIMessage
+from langchain_core.messages import HumanMessage
 
 from app.config.settings import settings
 
 def get_response_from_ai_agents(llm_id , query , allow_search ,system_prompt):
 
-    llm = ChatGroq(model=llm_id)
+    # Validate API keys
+    if not settings.GROQ_API_KEY:
+        raise ValueError("GROQ_API_KEY is not set in environment variables")
+    
+    if allow_search and not settings.TAVILY_API_KEY:
+        raise ValueError("TAVILY_API_KEY is not set in environment variables (required for web search)")
 
-    tools = [TavilySearchResults(max_results=2)] if allow_search else []
+    # Initialize ChatGroq with API key
+    llm = ChatGroq(
+        model=llm_id,
+        api_key=settings.GROQ_API_KEY,
+        temperature=0.7
+    )
 
+    # Initialize Tavily search tool with API key if search is enabled
+    tools = []
+    if allow_search:
+        tavily_tool = TavilySearchResults(
+            max_results=2,
+            api_key=settings.TAVILY_API_KEY
+        )
+        tools = [tavily_tool]
+
+    # Create the agent with system prompt as state modifier
     agent = create_react_agent(
         model=llm,
         tools=tools,
-        state_modifier=system_prompt
+        state_modifier=system_prompt if system_prompt else None
     )
 
-    state = {"messages" : query}
+    # Convert string messages to LangChain HumanMessage objects
+    # query is a List[str] from the API
+    langchain_messages = [HumanMessage(content=msg) for msg in query]
+
+    state = {"messages": langchain_messages}
 
     response = agent.invoke(state)
 
-    messages = response.get("messages")
+    messages = response.get("messages", [])
 
-    ai_messages = [message.content for message in messages if isinstance(message,AIMessage)]
+    # Extract AI messages
+    ai_messages = [message.content for message in messages if isinstance(message, AIMessage)]
+
+    if not ai_messages:
+        raise ValueError("No AI response generated")
 
     return ai_messages[-1]
 
