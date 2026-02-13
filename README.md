@@ -598,6 +598,8 @@ Follow these steps to deploy your app to **AWS ECS Fargate** using Jenkins and a
 
 ---
 
+<img width="1438" height="697" alt="Screenshot 2026-02-13 at 10 17 30 PM" src="https://github.com/user-attachments/assets/a06ab064-d911-4ac8-8b3a-bf9511eee94a" />
+
 ### ✅ **Deployment Complete**
 
 Your app is now deployed to AWS ECS Fargate. You can access it via the public IP at port `8501`. The deployment process has been automated using Jenkins, and the app is now live.
