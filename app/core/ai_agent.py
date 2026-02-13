@@ -3,7 +3,7 @@ from langchain_community.tools.tavily_search import TavilySearchResults
 
 from langgraph.prebuilt import create_react_agent
 from langchain_core.messages.ai import AIMessage
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, SystemMessage
 
 from app.config.settings import settings
 
@@ -32,16 +32,22 @@ def get_response_from_ai_agents(llm_id , query , allow_search ,system_prompt):
         )
         tools = [tavily_tool]
 
-    # Create the agent with system prompt as state modifier
+    # Create the agent (without state_modifier)
     agent = create_react_agent(
         model=llm,
-        tools=tools,
-        state_modifier=system_prompt if system_prompt else None
+        tools=tools
     )
 
+    # Build messages list: add SystemMessage if system_prompt is provided, then HumanMessages
+    langchain_messages = []
+    
+    # Add system prompt as SystemMessage if provided
+    if system_prompt and system_prompt.strip():
+        langchain_messages.append(SystemMessage(content=system_prompt))
+    
     # Convert string messages to LangChain HumanMessage objects
     # query is a List[str] from the API
-    langchain_messages = [HumanMessage(content=msg) for msg in query]
+    langchain_messages.extend([HumanMessage(content=msg) for msg in query])
 
     state = {"messages": langchain_messages}
 
