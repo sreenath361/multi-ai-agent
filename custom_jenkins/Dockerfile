@@ -5,16 +5,14 @@ FROM jenkins/jenkins:lts
 USER root
 
 # Install prerequisites and Docker
-RUN apt-get update -y && \
-    apt-get install -y apt-transport-https ca-certificates curl gnupg software-properties-common && \
-    curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - && \
-    echo "deb [arch=amd64] https://download.docker.com/linux/debian bullseye stable" > /etc/apt/sources.list.d/docker.list && \
-    apt-get update -y && \
-    apt-get install -y docker-ce docker-ce-cli containerd.io && \
+RUN apt-get update && \
+    apt-get install -y docker.io && \
     apt-get clean
 
+ARG DOCKER_GID=988
+
 # Add Jenkins user to the Docker group (create if it doesn't exist)
-RUN groupadd -f docker && \
+RUN groupadd -g ${DOCKER_GID} docker || groupmod -g ${DOCKER_GID} docker && \
     usermod -aG docker jenkins
 
 # Create the Docker directory and volume for DinD
