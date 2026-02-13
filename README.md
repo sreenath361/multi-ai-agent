@@ -4,21 +4,7 @@
 
 ## 🐧 Installing Ubuntu via WSL and Docker Engine Inside Ubuntu (on Windows)
 
-### 🔧 Step 1: Enable WSL and Virtualization
-
-Open **PowerShell as Administrator** and run:
-
-```powershell
-wsl --install
-```
-
-If WSL is already installed, update it:
-
-```powershell
-wsl --update
-```
-
-> Reboot your system if prompted.
+### 🔧 Step 1: Launch EC2 instance on AWS
 
 ---
 
@@ -32,7 +18,7 @@ wsl --update
 
 ---
 
-### 🐳 Step 3: Install Docker Engine in Ubuntu (WSL)
+### 🐳 Step 3: Install Docker Engine in Ubuntu (EC2)
 
 Run the following commands in the Ubuntu terminal:
 
@@ -56,15 +42,15 @@ echo \
 sudo apt update
 sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
 
-# 5. Add user to docker group (optional but recommended)
+# 5. Add user to docker group (recommended)
 sudo usermod -aG docker $USER
 ```
 
-> 🔁 **Restart the Ubuntu terminal** after running the above to apply group changes.
+> 🔁 **Restart the EC2 instancce** after running the above to apply group changes.
 
 ---
 
-✅ You can now run Docker inside Ubuntu WSL:
+✅ You can now run Docker inside EC2 Instance:
 
 ```bash
 docker --version
@@ -76,61 +62,46 @@ docker --version
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/data-guru0/MULTI-AI-AGENT-PROJECTS.git
-cd MULTI-AI-AGENT-PROJECTS
+git clone https://github.com/sreenath361/multi-ai-agent.git
+cd multi-ai-agent
 ```
 
 ### 2. Create and Activate a Virtual Environment
 
-#### On Windows
+#### On EC2
 
 ```bash
-python -m venv venv
-venv\Scripts\activate
+python3 -m venv venv
+source venv/bin/activate
+```
+### 3. Install Dependencies
+
+Create .env file and add Groq API and Tavily API key
+
+```bash
+GROQ_API_KEY=<Your API Key>
+TAVILY_API_KEY=<Your API Key>
 ```
 
-### 3. Install Dependencies
+### 4. Install Dependencies
 
 Install the required libraries using:
 
 ```bash
 pip install -e .
 ```
-### 4. Run the Application Locally
+### 5. Run the Application Locally
 
 ```bash
 python app/main.py
 ```
----
-
-## ✅ Progress Checklist
-
-The following essential setup steps have been completed:
-
-- ✅ **WSL Setup Full**  
-  - Ubuntu installed via Microsoft Store  
-  - Docker Engine installed inside Ubuntu WSL  
-  - Project runs successfully in WSL  
-
-- ✅ **Dockerfile Created**  
-  - Dockerfile written for the project  
-  - Environment variables setup will be handled later  
-  - Do **not** include `.env` in the Dockerfile for now
-
-- ✅ **GitHub Setup Completed**  
-  - Project is pushed to GitHub  
-  - `.gitignore` is properly configured and includes `.env`
-
 
 ---
-
-🟢 **You are now ready to move forward with Deployment phase.**
 
 
 # 🚀 Deployment to AWS FARGATE 
 Follow the steps below to deploy the application.
 
-- Make sure you run commands inside a WSL terminal in VS Code
 
 ## 🛠️ Step 1 :  Jenkins Setup for CI/CD (via Docker)
 
@@ -181,20 +152,16 @@ docker logs jenkins-dind
 
 You should see a password in the output. Copy that password.
 
-### 7. Find WSL IP Address
+### 7. GET EC2 Public IP Address
 
-Run the following command to get the IP address of your WSL environment:
-
-```bash
-ip addr show eth0 | grep inet
-```
+Goto AWS-> EC2-> Instances-> Public IPv4 address
 
 ### 8. Access Jenkins
 
-Now, access Jenkins on your browser using the following URL (replace `172.23.129.123` with the actual WSL IP address you retrieved):
+Now, access Jenkins on your browser using the following URL:
 
 ```
-http://172.23.129.123:8080
+http://<Public IPv4 address>:8080
 ```
 
 ### 9. Install Python and Set Up Jenkins
@@ -308,17 +275,8 @@ Follow these steps to integrate **SonarQube** with Jenkins for code quality anal
 
 ### 1. Download and Run SonarQube Docker Container
 
-1. Go to **DockerHub** and search for **SonarQube**. Scroll down to find the commands.
-2. Run the following commands in a new WSL terminal to configure the system:
 
-```bash
-sysctl -w vm.max_map_count=524288
-sysctl -w fs.file-max=131072
-ulimit -n 131072
-ulimit -u 8192
-```
-
-3. Run the SonarQube container with the appropriate settings. Make sure to change the container name to `sonarqube-dind` and remove the dollar sign (`$`) from the command. You will find the command in the **Demo** section of DockerHub.
+1. Run the SonarQube container with the appropriate settings. Make sure to change the container name to `sonarqube-dind` and remove the dollar sign (`$`) from the command. You will find the command in the **Demo** section of DockerHub.
 
 ```bash
 docker run -d --name sonarqube-dind \
@@ -327,13 +285,13 @@ docker run -d --name sonarqube-dind \
   sonarqube
 ```
 
-4. Check if the container is running:
+2. Check if the container is running:
 
 ```bash
 docker ps
 ```
 
-5. Access **SonarQube** on `http://<WSL_IP>:9000` (replace `<WSL_IP>` with your WSL IP address). Log in using the default credentials:  
+3. Access **SonarQube** on `http://<Public IPv4 address>:9000`. Log in using the default credentials:  
    - **Username:** `admin`  
    - **Password:** `admin`
 
@@ -378,7 +336,7 @@ docker restart jenkins-dind
 1. Go to **Manage Jenkins** -> **System Configuration**.
 2. Scroll down to **SonarQube Servers** and click **Add SonarQube**.
    - **Name:** `SonarQube` (or any name you prefer)
-   - **URL:** `http://<WSL_IP>:9000` (replace `<WSL_IP>` with your actual IP address)
+   - **URL:** `http://<Public IPv4 address>:9000` (replace `<Public IPv4 address>` with your actual IP address)
    - Select **SonarQube Token** from the credentials dropdown.
    - Apply and save.
 
@@ -608,7 +566,7 @@ Follow these steps to deploy your app to **AWS ECS Fargate** using Jenkins and a
 
 1. **Add ECS Full Access Policy** to the IAM user:
    - Go to **IAM** → **Users** → **Your IAM User** → **Attach Policies**.
-   - Attach the **AmazonEC2ContainerServiceFullAccess** policy to the IAM user.
+   - Attach the **AmazonECS_FullAccess** policy to the IAM user.
 
 2. **Update Jenkinsfile for ECS Deployment**:
    - Add the deployment stage to your `Jenkinsfile`. This will automate the deployment of your Docker container to AWS ECS.
@@ -648,11 +606,4 @@ Follow these steps to deploy your app to **AWS ECS Fargate** using Jenkins and a
 ### ✅ **Deployment Complete**
 
 Your app is now deployed to AWS ECS Fargate. You can access it via the public IP at port `8501`. The deployment process has been automated using Jenkins, and the app is now live.
-
-
-
-
-
-
-
 
